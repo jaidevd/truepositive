@@ -10,16 +10,23 @@
 
 """
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 from data_frame_model import DataFrameModel
 import pandas as pd
 
 
 class QIndexSelectorBox(QtGui.QComboBox):
+
     def __init__(self, parent, dfColumns):
         super(QIndexSelectorBox, self).__init__(parent=parent)
         self.indexList = [str(None)] + dfColumns.tolist()
         self.addItems(self.indexList)
+        self.currentIndexChanged.connect(self.changePreviewIndex)
+
+    @QtCore.Slot(QtCore.QObject, int)
+    def changePreviewIndex(self, newInt):
+        setattr(self.parent(), "INDEX_COL", newInt)
+        self.parent().changePreviewIndex(self.indexList[newInt])
 
 
 class QImportWizard(QtGui.QDialog):
@@ -47,8 +54,8 @@ class QImportWizard(QtGui.QDialog):
                                                   self.previewData.columns)
         indexSelectorLabel = QtGui.QLabel("Index Column")
         indexColLayout = QtGui.QHBoxLayout()
-        indexColLayout.addWidget(self.indexSelectorBox)
         indexColLayout.addWidget(indexSelectorLabel)
+        indexColLayout.addWidget(self.indexSelectorBox)
 
         # Layout
         layout = QtGui.QHBoxLayout()
@@ -61,3 +68,23 @@ class QImportWizard(QtGui.QDialog):
                                        nrows=self.PREVIEW_NROWS, sep=self.SEP,
                                        index_col=self.INDEX_COL,
                                        header=self.HEADER)
+
+    def changePreviewIndex(self, newCol):
+        if newCol == "None":
+            self.previewData.index = range(self.previewData.shape[0])
+        else:
+            newIndex = self.previewData[newCol]
+            self.previewData.set_index(newIndex, inplace=True)
+        self.previewModel = DataFrameModel(self.previewData)
+        self.tableView.setModel(self.previewModel)
+
+
+if __name__ == '__main__':
+    import os.path as op
+    import sys
+    filepath = op.join(op.dirname(__file__), "iris.csv")
+    app = QtGui.QApplication(sys.argv)
+    window = QImportWizard(None, filepath)
+    window.show()
+    app.exec_()
+    sys.exit()

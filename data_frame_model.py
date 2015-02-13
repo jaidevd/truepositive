@@ -21,16 +21,14 @@ class DataFrameModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
-            row = self.df.index[index.row()]
-            column = self.df.columns[index.column()]
-            return str(self.df[column][row])
+            return str(self.df.iget_value(index.row(), index.column()))
         return None
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.df.columns[section]
-            return self.df.index[section]
+            return str(self.df.index[section])
         return
 
     def rowCount(self, parent):
@@ -38,6 +36,3 @@ class DataFrameModel(QtCore.QAbstractTableModel):
 
     def columnCount(self, parent):
         return self.df.shape[1]
-
-
-
