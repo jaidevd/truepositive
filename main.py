@@ -28,15 +28,27 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         return str(self.df[column][row])
 
     def headerData(self, section, orientation, role):
-        if orientation == QtCore.Qt.Horizontal:
-            return self.df.columns[section]
-        return self.df.index[section]
+        if role == QtCore.Qt.DisplayRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return self.df.columns[section]
+            return self.df.index[section]
+        return
 
     def rowCount(self, parent):
         return self.df.shape[0]
 
     def columnCount(self, parent):
         return self.df.shape[1]
+
+
+class DataFrameHeader(QtGui.QHeaderView):
+
+    def __init__(self, index, orientation):
+        super(DataFrameHeader, self).__init__(orientation)
+        self.index = index
+
+    def count(self):
+        return self.index.shape[0]
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -48,8 +60,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.tableView = QtGui.QTableView(self)
         self.dataFrameModel = DataFrameModel(self.df)
-        self.tableView.setModel(self.dataFrameModel)
 
+        self.tableView.setModel(self.dataFrameModel)
         self.setCentralWidget(self.tableView)
 
     def read_csv(self):
