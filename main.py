@@ -14,6 +14,8 @@ import sys
 import pandas as pd
 import os.path as op
 from PySide import QtCore, QtGui
+from import_wizard import QImportWizard
+from data_frame_model import DataFrameModel
 
 
 class MyFileDialog(QtGui.QFileDialog):
@@ -30,33 +32,6 @@ class MyFileDialog(QtGui.QFileDialog):
         self.accepted.emit(self.parent)
 
 
-class DataFrameModel(QtCore.QAbstractTableModel):
-
-    def __init__(self, df=None):
-        self.df = df
-        super(DataFrameModel, self).__init__()
-
-    def data(self, index, role):
-        if role == QtCore.Qt.DisplayRole:
-            row = self.df.index[index.row()]
-            column = self.df.columns[index.column()]
-            return str(self.df[column][row])
-        return None
-
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole:
-            if orientation == QtCore.Qt.Horizontal:
-                return self.df.columns[section]
-            return self.df.index[section]
-        return
-
-    def rowCount(self, parent):
-        return self.df.shape[0]
-
-    def columnCount(self, parent):
-        return self.df.shape[1]
-
-
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, filepath=None):
@@ -68,7 +43,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Menu Bar
         self.openFileDialog = MyFileDialog(parent=self)
-        self.openFileDialog.accepted.connect(self.readCsv)
+        self.openFileDialog.accepted.connect(self.showImportWizard)
 
         menuBar = QtGui.QMenuBar()
         fileMenu = QtGui.QMenu("&File", parent=menuBar)
@@ -82,6 +57,10 @@ class MainWindow(QtGui.QMainWindow):
         df = pd.read_csv(self.filepath)
         self.dataFrameModel = DataFrameModel(df)
         self.tableView.setModel(self.dataFrameModel)
+
+    def showImportWizard(self):
+        self.importWiz = QImportWizard(self, filepath)
+        self.importWiz.show()
 
 
 if __name__ == '__main__':
