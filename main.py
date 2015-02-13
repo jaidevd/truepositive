@@ -39,6 +39,7 @@ class MainWindow(QtGui.QMainWindow):
         self.filepath = filepath
         self.tableView = QtGui.QTableView(self)
         self.setCentralWidget(self.tableView)
+        self.parserKwargs = {}
         self.readCsv()
 
         # Menu Bar
@@ -54,13 +55,20 @@ class MainWindow(QtGui.QMainWindow):
         self.setMenuBar(menuBar)
 
     def readCsv(self):
-        df = pd.read_csv(self.filepath)
+        df = pd.read_csv(self.filepath, **self.parserKwargs)
         self.dataFrameModel = DataFrameModel(df)
         self.tableView.setModel(self.dataFrameModel)
 
     def showImportWizard(self):
-        self.importWiz = QImportWizard(self, filepath)
-        self.importWiz.show()
+        self.importWiz = QImportWizard(self)
+        result = self.importWiz.exec_()
+        if result == QtGui.QDialog.Accepted:
+            self.makeParserKwargs()
+            self.readCsv()
+
+    def makeParserKwargs(self):
+        self.parserKwargs = {"sep": self.importWiz.SEP,
+                            "index_col": self.importWiz.INDEX_COL}
 
 
 if __name__ == '__main__':

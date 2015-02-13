@@ -54,11 +54,12 @@ class QImportWizard(QtGui.QDialog):
     INDEX_COL = None
     HEADER = 0
 
-    def __init__(self, parent, filepath):
-        super(QImportWizard, self).__init__(parent=parent)
+
+    def __init__(self, parent):
+        super(QImportWizard, self).__init__(parent)
         self.setWindowTitle("Import Wizard")
         self.setModal(True)
-        self.filepath = filepath
+        self.filepath = self.parent().filepath
         self.preview()
 
         # TableView widget
@@ -85,6 +86,16 @@ class QImportWizard(QtGui.QDialog):
         delimLayout.addWidget(delimiterSelectorLabel)
         delimLayout.addWidget(self.delimiterSelectorBox)
         paramLayout.addLayout(delimLayout)
+
+        # Ok/ Cancel Layout
+        ok_pb = QtGui.QPushButton("OK")
+        ok_pb.clicked.connect(self.accept)
+        no_pb = QtGui.QPushButton("Cancel")
+        no_pb.clicked.connect(self.reject)
+        okCancelLayout = QtGui.QHBoxLayout()
+        okCancelLayout.addWidget(ok_pb)
+        okCancelLayout.addWidget(no_pb)
+        paramLayout.addLayout(okCancelLayout)
 
         # Layout
         layout = QtGui.QHBoxLayout()
