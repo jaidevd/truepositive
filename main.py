@@ -43,16 +43,6 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         return self.df.shape[1]
 
 
-class DataFrameHeader(QtGui.QHeaderView):
-
-    def __init__(self, index, orientation):
-        super(DataFrameHeader, self).__init__(orientation)
-        self.index = index
-
-    def count(self):
-        return self.index.shape[0]
-
-
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, filepath=None):
