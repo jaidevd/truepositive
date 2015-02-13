@@ -15,6 +15,23 @@ from data_frame_model import DataFrameModel
 import pandas as pd
 
 
+class QDelimtierSelectorBox(QtGui.QComboBox):
+
+    def __init__(self, parent):
+        super(QDelimtierSelectorBox, self).__init__(parent=parent)
+        self.delimMap = {"Comma": ",",
+                         "Tab": "\t",
+                         "Space": " "}
+        self.addItems(self.delimMap.keys())
+        self.currentIndexChanged.connect(self.changePreviewDelimiter)
+
+    @QtCore.Slot(QtCore.QObject, int)
+    def changePreviewDelimiter(self, newInt):
+        key = self.delimMap.keys()[newInt]
+        setattr(self.parent(), "SEP", self.delimMap[key])
+        self.parent().changePreviewDelimiter()
+
+
 class QIndexSelectorBox(QtGui.QComboBox):
 
     def __init__(self, parent, dfColumns):
@@ -49,18 +66,30 @@ class QImportWizard(QtGui.QDialog):
         self.previewModel = DataFrameModel(self.previewData)
         self.tableView.setModel(self.previewModel)
 
+        # Layout for all parameters
+        paramLayout = QtGui.QVBoxLayout()
+
         # Index selector widget
-        self.indexSelectorBox = QIndexSelectorBox(parent,
+        self.indexSelectorBox = QIndexSelectorBox(self,
                                                   self.previewData.columns)
         indexSelectorLabel = QtGui.QLabel("Index Column")
         indexColLayout = QtGui.QHBoxLayout()
         indexColLayout.addWidget(indexSelectorLabel)
         indexColLayout.addWidget(self.indexSelectorBox)
+        paramLayout.addLayout(indexColLayout)
+
+        # Delimiter selector Widget
+        self.delimiterSelectorBox = QDelimtierSelectorBox(self)
+        delimiterSelectorLabel = QtGui.QLabel("Delimiter")
+        delimLayout = QtGui.QHBoxLayout()
+        delimLayout.addWidget(delimiterSelectorLabel)
+        delimLayout.addWidget(self.delimiterSelectorBox)
+        paramLayout.addLayout(delimLayout)
 
         # Layout
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self.tableView)
-        layout.addLayout(indexColLayout)
+        layout.addLayout(paramLayout)
         self.setLayout(layout)
 
     def preview(self):
@@ -75,6 +104,11 @@ class QImportWizard(QtGui.QDialog):
         else:
             newIndex = self.previewData[newCol]
             self.previewData.set_index(newIndex, inplace=True)
+        self.previewModel = DataFrameModel(self.previewData)
+        self.tableView.setModel(self.previewModel)
+
+    def changePreviewDelimiter(self):
+        self.preview()
         self.previewModel = DataFrameModel(self.previewData)
         self.tableView.setModel(self.previewModel)
 
