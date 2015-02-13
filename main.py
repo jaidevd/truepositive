@@ -23,9 +23,11 @@ class DataFrameModel(QtCore.QAbstractTableModel):
         super(DataFrameModel, self).__init__()
 
     def data(self, index, role):
-        row = self.df.index[index.row()]
-        column = self.df.columns[index.column()]
-        return str(self.df[column][row])
+        if role == QtCore.Qt.DisplayRole:
+            row = self.df.index[index.row()]
+            column = self.df.columns[index.column()]
+            return str(self.df[column][row])
+        return None
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
