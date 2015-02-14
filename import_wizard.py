@@ -196,6 +196,7 @@ class QImportWizard(QtGui.QDialog):
         nrowsSelectorLayout = QtGui.QHBoxLayout()
         nrowsSelectorLayout.addWidget(QtGui.QLabel("No. of rows"))
         nrowsSelectorLayout.addWidget(nrowsSelector)
+        self.nrowsSelector = nrowsSelector
         paramLayout.addLayout(nrowsSelectorLayout)
 
         # Ok/ Cancel Layout
@@ -251,6 +252,10 @@ class QImportWizard(QtGui.QDialog):
     def previewSelectedColumns(self):
         self.previewModel = DataFrameModel(self.previewData[self.USECOLS])
         self.tableView.setModel(self.previewModel)
+
+    def accept(self):
+        self.NROWS = int(self.nrowsSelector.text())
+        super(QImportWizard, self).accept()
 
 
 if __name__ == '__main__':
