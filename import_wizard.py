@@ -54,7 +54,6 @@ class QImportWizard(QtGui.QDialog):
     INDEX_COL = None
     HEADER = 0
 
-
     def __init__(self, parent):
         super(QImportWizard, self).__init__(parent)
         self.setWindowTitle("Import Wizard")

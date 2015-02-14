@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 """
-
+AbstractTableModel for Pandas dataframes
 """
 
 from PySide import QtCore
