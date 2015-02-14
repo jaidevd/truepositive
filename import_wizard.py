@@ -42,7 +42,7 @@ class QIndexSelectorBox(QtGui.QComboBox):
 
     @QtCore.Slot(QtCore.QObject, int)
     def changePreviewIndex(self, newInt):
-        setattr(self.parent(), "INDEX_COL", newInt)
+        setattr(self.parent(), "INDEX_COL", self.indexList[newInt])
         self.parent().changePreviewIndex(self.indexList[newInt])
 
 
