@@ -68,7 +68,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def makeParserKwargs(self):
         self.parserKwargs = {"sep": self.importWiz.SEP,
-                             "index_col": self.importWiz.INDEX_COL}
+                             "index_col": self.importWiz.INDEX_COL,
+                             "engine": self.importWiz.PARSER_ENGINE}
 
 
 if __name__ == '__main__':

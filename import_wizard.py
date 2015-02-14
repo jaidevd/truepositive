@@ -46,6 +46,32 @@ class QIndexSelectorBox(QtGui.QComboBox):
         self.parent().changePreviewIndex(self.indexList[newInt])
 
 
+class QParserButton(QtGui.QWidget):
+
+    def __init__(self, parent=None):
+        super(QParserButton, self).__init__(parent)
+        layout = QtGui.QHBoxLayout()
+        c_select = QtGui.QRadioButton("C", parent=self)
+        py_select = QtGui.QRadioButton("Python", parent=self)
+        c_select.setChecked(True)
+        c_select.toggled.connect(self.changeParserEngine)
+        py_select.toggled.connect(self.changeParserEngine)
+        layout.addWidget(c_select)
+        layout.addWidget(py_select)
+        self.setLayout(layout)
+        self.c_select = c_select
+        self.py_select = py_select
+
+    @QtCore.Slot(QtCore.QObject, str)
+    def changeParserEngine(self, toggled):
+        for engineBtn in (self.c_select, self.py_select):
+            if engineBtn.isChecked():
+                break
+        parser = engineBtn.text().lower()
+        setattr(self.parent(), "PARSER_ENGINE", parser)
+        self.parent().preview()
+
+
 class QImportWizard(QtGui.QDialog):
 
     # Initialize default constants
@@ -53,12 +79,16 @@ class QImportWizard(QtGui.QDialog):
     SEP = ','
     INDEX_COL = None
     HEADER = 0
+    PARSER_ENGINE = "c"
 
-    def __init__(self, parent):
+    def __init__(self, parent, filepath=None):
         super(QImportWizard, self).__init__(parent)
         self.setWindowTitle("Import Wizard")
         self.setModal(True)
-        self.filepath = self.parent().filepath
+        if filepath is None:
+            self.filepath = self.parent().filepath
+        else:
+            self.filepath = filepath
         self.preview()
 
         # TableView widget
@@ -96,6 +126,9 @@ class QImportWizard(QtGui.QDialog):
         okCancelLayout.addWidget(no_pb)
         paramLayout.addLayout(okCancelLayout)
 
+        # Parser Engine layout
+        paramLayout.addWidget(QParserButton(self))
+
         # Layout
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self.tableView)
@@ -106,7 +139,8 @@ class QImportWizard(QtGui.QDialog):
         self.previewData = pd.read_csv(self.filepath,
                                        nrows=self.PREVIEW_NROWS, sep=self.SEP,
                                        index_col=self.INDEX_COL,
-                                       header=self.HEADER)
+                                       header=self.HEADER,
+                                       engine=self.PARSER_ENGINE)
 
     def changePreviewIndex(self, newCol):
         if newCol == "None":
