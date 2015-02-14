@@ -46,6 +46,14 @@ class QIndexSelectorBox(QtGui.QComboBox):
         self.parent().changePreviewIndex(self.indexList[newInt])
 
 
+class QNRowsSelectorBox(QtGui.QComboBox):
+
+    def __init__(self, parent, orgNrows):
+        super(QNRowsSelectorBox, self).__init__(parent=parent)
+        self.itemList = map(str, range(orgNrows))
+        self.addItems(self.itemList)
+
+
 class QParserButton(QtGui.QWidget):
 
     def __init__(self, parent=None):
@@ -127,6 +135,7 @@ class QImportWizard(QtGui.QDialog):
     HEADER = 0
     PARSER_ENGINE = "c"
     USECOLS = None
+    NROWS = None
 
     def __init__(self, parent, filepath=None):
         super(QImportWizard, self).__init__(parent)
@@ -164,7 +173,12 @@ class QImportWizard(QtGui.QDialog):
         paramLayout.addLayout(delimLayout)
 
         # Parser Engine layout
-        paramLayout.addWidget(QParserButton(self))
+        parserSelector = QParserButton(self)
+        parserSelectorLabel = QtGui.QLabel("Parser Engine")
+        parserEngineLayout = QtGui.QHBoxLayout()
+        parserEngineLayout.addWidget(parserSelectorLabel)
+        parserEngineLayout.addWidget(parserSelector)
+        paramLayout.addLayout(parserEngineLayout)
 
         # Column select dialog
         self.colSelector = ColumnSelectorWidget(
@@ -173,6 +187,15 @@ class QImportWizard(QtGui.QDialog):
         selectColsBtn = QtGui.QPushButton("Select Columns")
         selectColsBtn.clicked.connect(self.showColumnSelector)
         paramLayout.addWidget(selectColsBtn)
+
+        # Nrows selector widget
+        with open(self.filepath, 'r') as f:
+            nrows = len(f.readlines())
+        nrowsSelector = QNRowsSelectorBox(parent=self, orgNrows=nrows)
+        nrowsSelectorLayout = QtGui.QHBoxLayout()
+        nrowsSelectorLayout.addWidget(QtGui.QLabel("No. of rows"))
+        nrowsSelectorLayout.addWidget(nrowsSelector)
+        paramLayout.addLayout(nrowsSelectorLayout)
 
         # Ok/ Cancel Layout
         ok_pb = QtGui.QPushButton("OK")
