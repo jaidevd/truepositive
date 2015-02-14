@@ -110,7 +110,8 @@ class ColumnSelectorWidget(QtGui.QDialog):
     def toggleCBoxList(self):
         if not self.allSelector.isChecked():
             for cBox in self.cBoxList:
-                cBox.setEnabled(True)
+                if cBox.text() != self.parent().INDEX_COL:
+                    cBox.setEnabled(True)
         else:
             for cBox in self.cBoxList:
                 cBox.setEnabled(False)
