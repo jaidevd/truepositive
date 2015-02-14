@@ -72,6 +72,51 @@ class QParserButton(QtGui.QWidget):
         self.parent().preview()
 
 
+class ColumnSelectorWidget(QtGui.QDialog):
+
+    def __init__(self, colList, parent=None):
+        super(ColumnSelectorWidget, self).__init__(parent=parent)
+        self.colList = colList
+
+        allSelector = QtGui.QCheckBox("All Columns")
+        allSelector.setChecked(True)
+        allSelector.stateChanged.connect(self.toggleCBoxList)
+        self.allSelector = allSelector
+
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(allSelector)
+        cBoxList = []
+        for col in colList:
+            cBox = QtGui.QCheckBox(str(col))
+            cBox.setChecked(True)
+            cBox.setEnabled(False)
+            cBoxList.append(cBox)
+        for cBox in cBoxList:
+            layout.addWidget(cBox)
+        self.cBoxList = cBoxList
+
+        # Ok/ Cancel Layout
+        ok_pb = QtGui.QPushButton("OK")
+        ok_pb.clicked.connect(self.accept)
+        no_pb = QtGui.QPushButton("Cancel")
+        no_pb.clicked.connect(self.reject)
+        okCancelLayout = QtGui.QHBoxLayout()
+        okCancelLayout.addWidget(ok_pb)
+        okCancelLayout.addWidget(no_pb)
+        layout.addLayout(okCancelLayout)
+
+        self.setLayout(layout)
+
+    def toggleCBoxList(self):
+        if not self.allSelector.isChecked():
+            for cBox in self.cBoxList:
+                cBox.setEnabled(True)
+        else:
+            for cBox in self.cBoxList:
+                cBox.setEnabled(False)
+                cBox.setChecked(True)
+
+
 class QImportWizard(QtGui.QDialog):
 
     # Initialize default constants
@@ -80,6 +125,7 @@ class QImportWizard(QtGui.QDialog):
     INDEX_COL = None
     HEADER = 0
     PARSER_ENGINE = "c"
+    USECOLS = None
 
     def __init__(self, parent, filepath=None):
         super(QImportWizard, self).__init__(parent)
@@ -116,6 +162,17 @@ class QImportWizard(QtGui.QDialog):
         delimLayout.addWidget(self.delimiterSelectorBox)
         paramLayout.addLayout(delimLayout)
 
+        # Parser Engine layout
+        paramLayout.addWidget(QParserButton(self))
+
+        # Column select dialog
+        self.colSelector = ColumnSelectorWidget(
+                                           self.previewData.columns.tolist(),
+                                           parent=self)
+        selectColsBtn = QtGui.QPushButton("Select Columns")
+        selectColsBtn.clicked.connect(self.showColumnSelector)
+        paramLayout.addWidget(selectColsBtn)
+
         # Ok/ Cancel Layout
         ok_pb = QtGui.QPushButton("OK")
         ok_pb.clicked.connect(self.accept)
@@ -126,21 +183,27 @@ class QImportWizard(QtGui.QDialog):
         okCancelLayout.addWidget(no_pb)
         paramLayout.addLayout(okCancelLayout)
 
-        # Parser Engine layout
-        paramLayout.addWidget(QParserButton(self))
-
         # Layout
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self.tableView)
         layout.addLayout(paramLayout)
         self.setLayout(layout)
 
+    def showColumnSelector(self):
+        if self.colSelector.exec_() == QtGui.QDialog.Accepted:
+            self.USECOLS = []
+            for cBox in self.colSelector.cBoxList:
+                if cBox.isChecked():
+                    self.USECOLS.append(cBox.text())
+            self.previewSelectedColumns()
+
     def preview(self):
         self.previewData = pd.read_csv(self.filepath,
                                        nrows=self.PREVIEW_NROWS, sep=self.SEP,
                                        index_col=self.INDEX_COL,
                                        header=self.HEADER,
-                                       engine=self.PARSER_ENGINE)
+                                       engine=self.PARSER_ENGINE,
+                                       usecols=self.USECOLS)
 
     def changePreviewIndex(self, newCol):
         if newCol == "None":
@@ -154,6 +217,10 @@ class QImportWizard(QtGui.QDialog):
     def changePreviewDelimiter(self):
         self.preview()
         self.previewModel = DataFrameModel(self.previewData)
+        self.tableView.setModel(self.previewModel)
+
+    def previewSelectedColumns(self):
+        self.previewModel = DataFrameModel(self.previewData[self.USECOLS])
         self.tableView.setModel(self.previewModel)
 
 
