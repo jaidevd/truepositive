@@ -71,7 +71,8 @@ class MainWindow(QtGui.QMainWindow):
                              "index_col": self.importWiz.INDEX_COL,
                              "engine": self.importWiz.PARSER_ENGINE,
                              "usecols": self.importWiz.USECOLS,
-                             "nrows": self.importWiz.NROWS}
+                             "nrows": self.importWiz.NROWS,
+                             "parse_dates": self.importWiz.DATETIME_COLS}
 
 
 if __name__ == '__main__':
@@ -79,5 +80,4 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     window = MainWindow(filepath)
     window.show()
-    app.exec_()
-    sys.exit()
+    sys.exit(app.exec_())

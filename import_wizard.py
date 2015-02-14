@@ -128,6 +128,44 @@ class ColumnSelectorWidget(QtGui.QDialog):
                 cBox.setChecked(True)
 
 
+class DateTimeColumnSelector(QtGui.QDialog):
+
+    def __init__(self, colList, parent=None):
+        super(DateTimeColumnSelector, self).__init__(parent=parent)
+        self.colList = colList
+        self.dateTimeCols = []
+
+        layout = QtGui.QVBoxLayout()
+        cBoxList = []
+        for col in colList:
+            cBox = QtGui.QCheckBox(str(col))
+            cBox.setChecked(False)
+            cBoxList.append(cBox)
+        for cBox in cBoxList:
+            layout.addWidget(cBox)
+        self.cBoxList = cBoxList
+
+        # Ok/ Cancel Layout
+        ok_pb = QtGui.QPushButton("OK")
+        ok_pb.clicked.connect(self.accept)
+        no_pb = QtGui.QPushButton("Cancel")
+        no_pb.clicked.connect(self.reject)
+        okCancelLayout = QtGui.QHBoxLayout()
+        okCancelLayout.addWidget(ok_pb)
+        okCancelLayout.addWidget(no_pb)
+        layout.addLayout(okCancelLayout)
+
+        self.setLayout(layout)
+
+    def accept(self):
+        for box in self.cBoxList:
+            if box.isChecked():
+                self.dateTimeCols.append(box.text())
+        if len(self.dateTimeCols) > 0:
+            setattr(self.parent(), 'DATETIME_COLS', self.dateTimeCols)
+        super(DateTimeColumnSelector, self).accept()
+
+
 class QImportWizard(QtGui.QDialog):
 
     # Initialize default constants
@@ -138,6 +176,7 @@ class QImportWizard(QtGui.QDialog):
     PARSER_ENGINE = "c"
     USECOLS = None
     NROWS = None
+    DATETIME_COLS = False
 
     def __init__(self, parent, filepath=None):
         super(QImportWizard, self).__init__(parent)
@@ -189,6 +228,14 @@ class QImportWizard(QtGui.QDialog):
         selectColsBtn = QtGui.QPushButton("Select Columns")
         selectColsBtn.clicked.connect(self.showColumnSelector)
         paramLayout.addWidget(selectColsBtn)
+
+        # DateTime column selector dialog
+        self.dateTimeColSelector = DateTimeColumnSelector(
+                                            self.previewData.columns.tolist(),
+                                            parent=self)
+        selectDTimeColsBtn = QtGui.QPushButton("Select DateTime Columns")
+        selectDTimeColsBtn.clicked.connect(self.dateTimeColSelector.exec_)
+        paramLayout.addWidget(selectDTimeColsBtn)
 
         # Nrows selector widget
         nrows = self.getMaxRows()
