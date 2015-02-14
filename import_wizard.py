@@ -13,6 +13,7 @@
 from PySide import QtGui, QtCore
 from data_frame_model import DataFrameModel
 import pandas as pd
+from misc import colnames
 
 
 class QDelimtierSelectorBox(QtGui.QComboBox):
@@ -46,12 +47,13 @@ class QIndexSelectorBox(QtGui.QComboBox):
         self.parent().changePreviewIndex(self.indexList[newInt])
 
 
-class QNRowsSelectorBox(QtGui.QComboBox):
+class QNRowsSelectorBox(QtGui.QLineEdit):
 
     def __init__(self, parent, orgNrows):
         super(QNRowsSelectorBox, self).__init__(parent=parent)
-        self.itemList = map(str, range(orgNrows))
-        self.addItems(self.itemList)
+        self.setText(str(orgNrows))
+        validator = QtGui.QIntValidator(0, orgNrows, self)
+        self.setValidator(validator)
 
 
 class QParserButton(QtGui.QWidget):
@@ -189,8 +191,7 @@ class QImportWizard(QtGui.QDialog):
         paramLayout.addWidget(selectColsBtn)
 
         # Nrows selector widget
-        with open(self.filepath, 'r') as f:
-            nrows = len(f.readlines())
+        nrows = self.getMaxRows()
         nrowsSelector = QNRowsSelectorBox(parent=self, orgNrows=nrows)
         nrowsSelectorLayout = QtGui.QHBoxLayout()
         nrowsSelectorLayout.addWidget(QtGui.QLabel("No. of rows"))
@@ -212,6 +213,10 @@ class QImportWizard(QtGui.QDialog):
         layout.addWidget(self.tableView)
         layout.addLayout(paramLayout)
         self.setLayout(layout)
+
+    def getMaxRows(self):
+        firstCol = colnames(self.filepath)[0]
+        return pd.read_csv(self.filepath, usecols=[firstCol]).shape[0]
 
     def showColumnSelector(self):
         if self.colSelector.exec_() == QtGui.QDialog.Accepted:
