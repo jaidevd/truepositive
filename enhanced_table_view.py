@@ -41,7 +41,15 @@ class QEnhancedTableView(QtGui.QTableView):
 
         menu.addMenu(self.xyPlotMenu)
 
+        self.histAct = QtGui.QAction("&Histogram", self,
+                                     triggered=self.showHistogram)
+        menu.addAction(self.histAct)
+
         menu.exec_(event.globalPos())
+
+    def showHistogram(self):
+        tabbedArea = self.parent().parent().tabbedArea
+        tabbedArea.setCurrentIndex(1)
 
     def plotColsLine(self, **kwargs):
         df = self.model().df
