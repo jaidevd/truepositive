@@ -23,34 +23,46 @@ class PlotPropertiesDialog(QtGui.QDialog):
 
         # Plot Style
         plotStyleLayout = QtGui.QHBoxLayout()
-        line_select = QtGui.QRadioButton("Line", self)
-        scatter_select = QtGui.QRadioButton("Scatter", self)
+        self.line_select = QtGui.QRadioButton("Line", self)
+        self.line_select.setChecked(True)
+        self.scatter_select = QtGui.QRadioButton("Scatter", self)
         plotStyleLayout.addWidget(QtGui.QLabel("Plot Style"))
-        plotStyleLayout.addWidget(line_select)
-        plotStyleLayout.addWidget(scatter_select)
+        plotStyleLayout.addWidget(self.line_select)
+        plotStyleLayout.addWidget(self.scatter_select)
         masterLayout.addLayout(plotStyleLayout)
 
         # Marker character selector
         markerLayout = QtGui.QHBoxLayout()
         markerLayout.addWidget(QtGui.QLabel("Marker"))
-        markerSelector = QtGui.QComboBox(self)
-        markerSelector.addItems(MarkerStyle.markers.values())
-        markerLayout.addWidget(markerSelector)
+        self.markerSelector = QtGui.QComboBox(self)
+        self.markerSelector.addItems(MarkerStyle.markers.keys())
+        # FIXME: Fix the nothings
+        markerLayout.addWidget(self.markerSelector)
         masterLayout.addLayout(markerLayout)
 
         # Markersize layout
         markerSizeLayout = QtGui.QHBoxLayout()
         markerSizeLayout.addWidget(QtGui.QLabel("Marker Size"))
-        markerSizeSelector = QtGui.QLineEdit(self)
-        markerSizeSelector.setValidator(QtGui.QDoubleValidator())
-        markerSizeLayout.addWidget(markerSizeSelector)
+        self.markerSizeSelector = QtGui.QLineEdit(self)
+        self.markerSizeSelector.setValidator(QtGui.QDoubleValidator())
+        markerSizeLayout.addWidget(self.markerSizeSelector)
         masterLayout.addLayout(markerSizeLayout)
 
         # ColorPicker
+        # Default color
+        self.color = 'b'
         colorSelectorBtn = QtGui.QPushButton("Colors")
         colorSelectorBtn.clicked.connect(self.showColorPicker)
         self.colorPicker = QtGui.QColorDialog(self)
         masterLayout.addWidget(colorSelectorBtn)
+
+        # Grid bool
+        gridSelectorLayout = QtGui.QHBoxLayout()
+        gridSelectorLayout.addWidget(QtGui.QLabel("Show Grid"))
+        self.gridSelector = QtGui.QCheckBox()
+        self.gridSelector.setChecked(True)
+        gridSelectorLayout.addWidget(self.gridSelector)
+        masterLayout.addLayout(gridSelectorLayout)
 
         # Ok/Cancel layout
         ok_pb = QtGui.QPushButton("OK")
@@ -69,19 +81,33 @@ class PlotPropertiesDialog(QtGui.QDialog):
         super(PlotPropertiesDialog, self).accept()
 
     def getKwargs(self):
-        pass
+        # Marker
+        ix = self.markerSelector.currentIndex()
+        marker = MarkerStyle.markers.keys()[ix]
+        # Marker size
+        markerSize = float(self.markerSizeSelector.text())
+        # Plot style
+        if self.line_select.isChecked():
+            style = "line"
+            self.plotKwargs = dict(style=style, marker=marker,
+                                   markersize=markerSize, color=self.color,
+                                   grid=self.gridSelector.isChecked())
+        else:
+            style = "scatter"
+            self.plotKwargs = dict(style=style, marker=marker,
+                                   s=markerSize, c=self.color,
+                                   grid=self.gridSelector.isChecked())
 
     def showColorPicker(self):
         if self.colorPicker.exec_() == QtGui.QDialog.Accepted:
-            self.getColors()
+            self.color = self.colorPicker.currentColor().name()
 
-    def getColors(self):
-        pass
 
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)
     window = PlotPropertiesDialog()
-    window.show()
+    if window.exec_() == QtGui.QDialog.Accepted:
+        print window.plotKwargs
     app.exec_()
     sys.exit()

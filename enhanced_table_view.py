@@ -51,7 +51,9 @@ class QEnhancedTableView(QtGui.QTableView):
             yCol = df.columns[selection[1].left()]
         x = df[xCol].values
         y = df[yCol].values
+        grid = kwargs.pop('grid')
         self.ax.plot(x, y, **kwargs)
+        self.ax.grid(grid)
         self.ax.set_xlabel(xCol)
         self.ax.set_ylabel(yCol)
 
@@ -63,7 +65,9 @@ class QEnhancedTableView(QtGui.QTableView):
             yCol = df.columns[selection[1].left()]
         x = df[xCol].values
         y = df[yCol].values
+        grid = kwargs.pop('grid')
         self.ax.scatter(x, y, **kwargs)
+        self.ax.grid(grid)
         self.ax.set_xlabel(xCol)
         self.ax.set_ylabel(yCol)
 
