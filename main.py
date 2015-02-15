@@ -17,6 +17,7 @@ from PySide import QtCore, QtGui
 from import_wizard import QImportWizard
 from data_frame_model import DataFrameModel
 from q_canvas import QCanvas
+from enhanced_table_view import QEnhancedTableView
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -40,12 +41,12 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, filepath=None):
         super(MainWindow, self).__init__()
 
+        self.getPlotArea()
+
         self.filepath = filepath
-        self.tableView = QtGui.QTableView(self)
+        self.tableView = QEnhancedTableView(self, self.ax)
 
-        self.canvas = self.getPlotArea()
-
-        centralSplitter = QtGui.QSplitter()
+        centralSplitter = QtGui.QSplitter(self)
         centralSplitter.addWidget(self.tableView)
         centralSplitter.addWidget(self.canvas)
 
@@ -86,17 +87,18 @@ class MainWindow(QtGui.QMainWindow):
                              "parse_dates": self.importWiz.DATETIME_COLS}
 
     def getPlotArea(self):
-        fig = self.getExampleFigure()
-        canvas = QCanvas(fig, self)
-        return canvas
+        self.getExampleFigure()
+        self.canvas = QCanvas(self.fig, self)
 
     def getExampleFigure(self):
         x = np.linspace(-2*np.pi, 2*np.pi, 1000)
         y = np.sin(x)
         fig = plt.figure()
         ax = fig.add_subplot(111)
+        ax.hold(False)
         ax.plot(x, y)
-        return fig
+        self.ax = ax
+        self.fig = fig
 
 
 if __name__ == '__main__':
