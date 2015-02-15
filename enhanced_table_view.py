@@ -11,6 +11,7 @@ another table editor... # TODO: Get a life.
 """
 
 from PySide import QtGui
+from dialogs import PlotPropertiesDialog
 
 
 class QEnhancedTableView(QtGui.QTableView):
@@ -27,14 +28,22 @@ class QEnhancedTableView(QtGui.QTableView):
         self.xyPlotLines = QtGui.QAction("&Lines", self,
                                          triggered=self.plotColsLine)
         self.xyPlotMenu.addAction(self.xyPlotLines)
+
         self.xyPlotScatter = QtGui.QAction("&Scatter", self,
                                            triggered=self.plotColsScatter)
         self.xyPlotMenu.addAction(self.xyPlotScatter)
+
+        self.xyPlotMenu.addSeparator()
+
+        self.editPlotAct = QtGui.QAction("&Properties", self,
+                                         triggered=self.showPlotProperties)
+        self.xyPlotMenu.addAction(self.editPlotAct)
+
         menu.addMenu(self.xyPlotMenu)
 
         menu.exec_(event.globalPos())
 
-    def plotColsLine(self):
+    def plotColsLine(self, **kwargs):
         df = self.model().df
         selection = self.selectionModel().selection()
         if len(selection) == 2:
@@ -42,11 +51,11 @@ class QEnhancedTableView(QtGui.QTableView):
             yCol = df.columns[selection[1].left()]
         x = df[xCol].values
         y = df[yCol].values
-        self.ax.plot(x, y)
+        self.ax.plot(x, y, **kwargs)
         self.ax.set_xlabel(xCol)
         self.ax.set_ylabel(yCol)
 
-    def plotColsScatter(self):
+    def plotColsScatter(self, **kwargs):
         df = self.model().df
         selection = self.selectionModel().selection()
         if len(selection) == 2:
@@ -54,6 +63,15 @@ class QEnhancedTableView(QtGui.QTableView):
             yCol = df.columns[selection[1].left()]
         x = df[xCol].values
         y = df[yCol].values
-        self.ax.scatter(x, y)
+        self.ax.scatter(x, y, **kwargs)
         self.ax.set_xlabel(xCol)
         self.ax.set_ylabel(yCol)
+
+    def showPlotProperties(self):
+        dlg = PlotPropertiesDialog()
+        if dlg.exec_() == QtGui.QDialog.Accepted:
+            props = dlg.plotKwargs
+            if props.pop('style') == "line":
+                self.plotColsLine(**props)
+            else:
+                self.plotColsScatter(**props)
