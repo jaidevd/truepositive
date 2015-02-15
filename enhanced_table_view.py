@@ -65,6 +65,7 @@ class QEnhancedTableView(QtGui.QTableView):
         self.ax.grid(grid)
         self.ax.set_xlabel(xCol)
         self.ax.set_ylabel(yCol)
+        self.ax.figure.canvas.draw()
 
     def plotColsScatter(self, **kwargs):
         df = self.model().df
@@ -79,6 +80,7 @@ class QEnhancedTableView(QtGui.QTableView):
         self.ax.grid(grid)
         self.ax.set_xlabel(xCol)
         self.ax.set_ylabel(yCol)
+        self.ax.figure.canvas.draw()
 
     def showPlotProperties(self):
         dlg = PlotPropertiesDialog()
@@ -92,3 +94,4 @@ class QEnhancedTableView(QtGui.QTableView):
     def redrawHistogram(self, pos):
         x = self.parent().parent().x
         self.histAx.hist(x, pos)
+        self.histAx.figure.canvas.draw()
