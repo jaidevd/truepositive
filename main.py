@@ -45,11 +45,22 @@ class MainWindow(QtGui.QMainWindow):
         self.getHistPlotArea()
 
         self.filepath = filepath
-        self.tableView = QEnhancedTableView(self, self.ax)
+        self.tableView = QEnhancedTableView(self, self.ax, self.histAx)
 
         self.tabbedArea = QtGui.QTabWidget()
         self.tabbedArea.addTab(self.xyCanvas, "XY Plots")
-        self.tabbedArea.addTab(self.histCanvas, "Histogram")
+        histWidget = QtGui.QWidget(self.tabbedArea)
+        histLayout = QtGui.QHBoxLayout()
+        self.binSlider = QtGui.QSlider(QtCore.Qt.Vertical, parent=histWidget)
+        self.binSlider.setRange(10, 100)
+        self.binSlider.setSingleStep(10)
+        self.binSlider.setTickPosition(QtGui.QSlider.TicksRight)
+        self.binSlider.setTracking(False)
+        self.binSlider.valueChanged.connect(self.tableView.redrawHistogram)
+        histLayout.addWidget(self.histCanvas)
+        histLayout.addWidget(self.binSlider)
+        histWidget.setLayout(histLayout)
+        self.tabbedArea.addTab(histWidget, "Histogram")
 
         centralSplitter = QtGui.QSplitter(self)
         centralSplitter.addWidget(self.tableView)
@@ -115,6 +126,7 @@ class MainWindow(QtGui.QMainWindow):
         histAx = histFig.add_subplot(111)
         histAx.hold(False)
         histAx.hist(x, 100)
+        self.x = x
         self.histAx = histAx
         self.histFig = histFig
 

@@ -16,9 +16,10 @@ from dialogs import PlotPropertiesDialog
 
 class QEnhancedTableView(QtGui.QTableView):
 
-    def __init__(self, parent=None, ax=None):
+    def __init__(self, parent=None, ax=None, histAx=None):
         super(QEnhancedTableView, self).__init__(parent)
         self.ax = ax
+        self.histAx = histAx
         self.setAlternatingRowColors(True)
 
     def contextMenuEvent(self, event):
@@ -87,3 +88,7 @@ class QEnhancedTableView(QtGui.QTableView):
                 self.plotColsLine(**props)
             else:
                 self.plotColsScatter(**props)
+
+    def redrawHistogram(self, pos):
+        x = self.parent().parent().x
+        self.histAx.hist(x, pos)
