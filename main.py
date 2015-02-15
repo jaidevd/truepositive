@@ -16,6 +16,9 @@ import os.path as op
 from PySide import QtCore, QtGui
 from import_wizard import QImportWizard
 from data_frame_model import DataFrameModel
+from q_canvas import QCanvas
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class MyFileDialog(QtGui.QFileDialog):
@@ -36,9 +39,17 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, filepath=None):
         super(MainWindow, self).__init__()
+
         self.filepath = filepath
         self.tableView = QtGui.QTableView(self)
-        self.setCentralWidget(self.tableView)
+
+        self.canvas = self.getPlotArea()
+
+        centralSplitter = QtGui.QSplitter()
+        centralSplitter.addWidget(self.tableView)
+        centralSplitter.addWidget(self.canvas)
+
+        self.setCentralWidget(centralSplitter)
         self.parserKwargs = {}
         self.readCsv()
 
@@ -73,6 +84,19 @@ class MainWindow(QtGui.QMainWindow):
                              "usecols": self.importWiz.USECOLS,
                              "nrows": self.importWiz.NROWS,
                              "parse_dates": self.importWiz.DATETIME_COLS}
+
+    def getPlotArea(self):
+        fig = self.getExampleFigure()
+        canvas = QCanvas(fig, self)
+        return canvas
+
+    def getExampleFigure(self):
+        x = np.linspace(-2*np.pi, 2*np.pi, 1000)
+        y = np.sin(x)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(x, y)
+        return fig
 
 
 if __name__ == '__main__':
