@@ -93,17 +93,23 @@ class ColumnSelectorWidget(QtGui.QDialog):
         allSelector.stateChanged.connect(self.toggleCBoxList)
         self.allSelector = allSelector
 
+        noneSelector = QtGui.QPushButton("Select None")
+        noneSelector.clicked.connect(self.triggerNoneSelect)
+        self.noneSelector = noneSelector
+
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(allSelector)
-        cBoxList = []
+        masterSelectors = QtGui.QHBoxLayout()
+        masterSelectors.addWidget(self.allSelector)
+        masterSelectors.addWidget(self.noneSelector)
+        layout.addLayout(masterSelectors)
+        self.cBoxList = []
         for col in colList:
             cBox = QtGui.QCheckBox(str(col))
             cBox.setChecked(True)
             cBox.setEnabled(False)
-            cBoxList.append(cBox)
-        for cBox in cBoxList:
+            self.cBoxList.append(cBox)
+        for cBox in self.cBoxList:
             layout.addWidget(cBox)
-        self.cBoxList = cBoxList
 
         # Ok/ Cancel Layout
         ok_pb = QtGui.QPushButton("OK")
@@ -124,8 +130,13 @@ class ColumnSelectorWidget(QtGui.QDialog):
                     cBox.setEnabled(True)
         else:
             for cBox in self.cBoxList:
-                cBox.setEnabled(False)
                 cBox.setChecked(True)
+                cBox.setEnabled(False)
+
+    def triggerNoneSelect(self):
+        self.allSelector.setChecked(False)
+        for cBox in self.cBoxList:
+            cBox.setChecked(False)
 
 
 class DateTimeColumnSelector(QtGui.QDialog):
