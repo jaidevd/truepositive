@@ -41,14 +41,19 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, filepath=None):
         super(MainWindow, self).__init__()
 
-        self.getPlotArea()
+        self.getXYPlotArea()
+        self.getHistPlotArea()
 
         self.filepath = filepath
         self.tableView = QEnhancedTableView(self, self.ax)
 
+        self.tabbedArea = QtGui.QTabWidget()
+        self.tabbedArea.addTab(self.xyCanvas, "XY Plots")
+        self.tabbedArea.addTab(self.histCanvas, "Histogram")
+
         centralSplitter = QtGui.QSplitter(self)
         centralSplitter.addWidget(self.tableView)
-        centralSplitter.addWidget(self.canvas)
+        centralSplitter.addWidget(self.tabbedArea)
 
         self.setCentralWidget(centralSplitter)
         self.parserKwargs = {}
@@ -86,9 +91,13 @@ class MainWindow(QtGui.QMainWindow):
                              "nrows": self.importWiz.NROWS,
                              "parse_dates": self.importWiz.DATETIME_COLS}
 
-    def getPlotArea(self):
+    def getXYPlotArea(self):
         self.getExampleFigure()
-        self.canvas = QCanvas(self.fig, self)
+        self.xyCanvas = QCanvas(self.fig, self)
+
+    def getHistPlotArea(self):
+        self.getExampleHist()
+        self.histCanvas = QCanvas(self.histFig, self)
 
     def getExampleFigure(self):
         x = np.linspace(-2*np.pi, 2*np.pi, 1000)
@@ -99,6 +108,15 @@ class MainWindow(QtGui.QMainWindow):
         ax.plot(x, y)
         self.ax = ax
         self.fig = fig
+
+    def getExampleHist(self):
+        x = np.random.random(1000)
+        histFig = plt.figure()
+        histAx = histFig.add_subplot(111)
+        histAx.hold(False)
+        histAx.hist(x, 100)
+        self.histAx = histAx
+        self.histFig = histFig
 
 
 if __name__ == '__main__':
