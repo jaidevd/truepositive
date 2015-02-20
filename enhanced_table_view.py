@@ -11,7 +11,7 @@ another table editor... # TODO: Get a life.
 """
 
 from PySide import QtGui
-from dialogs import PlotPropertiesDialog
+from dialogs import PlotPropertiesDialog, QSummStatDlg
 
 
 class QEnhancedTableView(QtGui.QTableView):
@@ -46,7 +46,19 @@ class QEnhancedTableView(QtGui.QTableView):
                                      triggered=self.showHistogram)
         menu.addAction(self.histAct)
 
+        self.summStatAct = QtGui.QAction("Su&mmary Statistics", self,
+                                         triggered=self.showSummStats)
+        menu.addAction(self.summStatAct)
+
         menu.exec_(event.globalPos())
+
+    def showSummStats(self):
+        df = self.model().df
+        selection = self.selectionModel().selection()
+        col = df.columns[selection[0].left()]
+        desc = df[col].describe().to_string()
+        dlg = QSummStatDlg(self, desc)
+        dlg.show()
 
     def showHistogram(self):
         tabbedArea = self.parent().parent().tabbedArea

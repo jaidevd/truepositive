@@ -14,6 +14,15 @@ from PySide import QtGui
 from matplotlib.markers import MarkerStyle
 
 
+class QSummStatDlg(QtGui.QDialog):
+    def __init__(self, parent=None, text=None):
+        super(QSummStatDlg, self).__init__(parent)
+        self.desc = QtGui.QLabel(text)
+        masterLayout = QtGui.QVBoxLayout(self)
+        masterLayout.addWidget(self.desc)
+        self.setLayout(masterLayout)
+
+
 class PlotPropertiesDialog(QtGui.QDialog):
 
     def __init__(self, parent=None):
