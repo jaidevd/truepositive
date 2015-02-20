@@ -63,6 +63,7 @@ class QEnhancedTableView(QtGui.QTableView):
     def showHistogram(self):
         tabbedArea = self.parent().parent().tabbedArea
         tabbedArea.setCurrentIndex(1)
+        self.redrawHistogram()
 
     def plotColsLine(self, **kwargs):
         df = self.model().df
@@ -103,7 +104,16 @@ class QEnhancedTableView(QtGui.QTableView):
             else:
                 self.plotColsScatter(**props)
 
-    def redrawHistogram(self, pos):
-        x = self.parent().parent().x
-        self.histAx.hist(x, pos)
+    def redrawHistogram(self):
+        pos = self.parent().parent().binSlider.value()
+        selection = self.selectionModel().selection()
+        if len(selection) == 1:
+            df = self.model().df
+            xCol = df.columns[selection[0].left()]
+            x = df[xCol]
+            self.histAx.hist(x, pos)
+            self.histAx.set_title(xCol)
+        else:
+            x = self.parent().parent().x
+            self.histAx.hist(x, pos)
         self.histAx.figure.canvas.draw()
