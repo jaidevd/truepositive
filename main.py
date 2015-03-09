@@ -43,9 +43,11 @@ class MainWindow(QtGui.QMainWindow):
 
         self.getXYPlotArea()
         self.getHistPlotArea()
+        self.getBarPlotArea()
 
         self.filepath = filepath
-        self.tableView = QEnhancedTableView(self, self.ax, self.histAx)
+        self.tableView = QEnhancedTableView(self, self.ax, self.histAx,
+                                            self.barAx)
 
         self.tabbedArea = QtGui.QTabWidget()
         self.tabbedArea.addTab(self.xyCanvas, "XY Plots")
@@ -61,6 +63,7 @@ class MainWindow(QtGui.QMainWindow):
         histLayout.addWidget(self.binSlider)
         histWidget.setLayout(histLayout)
         self.tabbedArea.addTab(histWidget, "Histogram")
+        self.tabbedArea.addTab(self.barCanvas, "Bar Charts")
 
         centralSplitter = QtGui.QSplitter(self)
         centralSplitter.addWidget(self.tableView)
@@ -110,6 +113,10 @@ class MainWindow(QtGui.QMainWindow):
         self.getExampleHist()
         self.histCanvas = QCanvas(self.histFig, self)
 
+    def getBarPlotArea(self):
+        self.getExampleBar()
+        self.barCanvas = QCanvas(self.barFig, self)
+
     def getExampleFigure(self):
         x = np.linspace(-2*np.pi, 2*np.pi, 1000)
         y = np.sin(x)
@@ -129,6 +136,18 @@ class MainWindow(QtGui.QMainWindow):
         self.x = x
         self.histAx = histAx
         self.histFig = histFig
+
+    def getExampleBar(self):
+        x = ['foo', 'bar', 'baz']
+        y = [5, 10, 15]
+        barFig = plt.figure()
+        barAx = barFig.add_subplot(111)
+        barAx.hold(False)
+        barAx.bar(range(len(x)), y)
+        barAx.set_xticks(np.arange(3) + 0.8)
+        barAx.set_xticklabels(x)
+        self.barAx = barAx
+        self.barFig = barFig
 
 
 if __name__ == '__main__':
