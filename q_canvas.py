@@ -15,12 +15,28 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as \
         FigureCanvas
 import matplotlib.pyplot as plt
 import numpy as np
+from dialogs import PlotPropertiesDialog
 
 
 class QCanvas(FigureCanvas):
     def __init__(self, figure, parent):
         super(QCanvas, self).__init__(figure)
         self.setParent(parent)
+
+    def contextMenuEvent(self, event):
+        menu = QtGui.QMenu(self)
+        self.editPlotPropsAct = QtGui.QAction("&Edit Properties", self,
+                                              triggered=self.showPropsDialog)
+        menu.addAction(self.editPlotPropsAct)
+        menu.exec_(event.globalPos())
+
+    def showPropsDialog(self):
+        dlg = PlotPropertiesDialog(self)
+        if dlg.exec_() == QtGui.QDialog.Accepted:
+            self.redrawAxes()
+
+    def redrawAxes(self):
+        pass
 
 
 class MainWindow(QtGui.QMainWindow):
