@@ -10,7 +10,7 @@
 AbstractTableModel for Pandas dataframes
 """
 
-from PySide import QtCore
+from PyQt4 import QtCore
 
 
 class DataFrameModel(QtCore.QAbstractTableModel):

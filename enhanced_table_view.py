@@ -10,7 +10,7 @@
 another table editor... # TODO: Get a life.
 """
 
-from PySide import QtGui
+from PyQt4 import QtGui
 from dialogs import PlotPropertiesDialog, QSummStatDlg
 import numpy as np
 
@@ -18,7 +18,7 @@ import numpy as np
 class QEnhancedTableView(QtGui.QTableView):
 
     def __init__(self, parent=None, ax=None, histAx=None, barAx=None):
-        super(QEnhancedTableView, self).__init__(parent)
+        super(QEnhancedTableView, self).__init__(parent=parent)
         self.ax = ax
         self.histAx = histAx
         self.barAx = barAx
@@ -99,7 +99,7 @@ class QEnhancedTableView(QtGui.QTableView):
             yCol = df.columns[selection[1].left()]
         x = df[xCol].values
         y = df[yCol].values
-        grid = kwargs.pop('grid')
+        grid = kwargs.pop('grid', True)
         self.ax.scatter(x, y, **kwargs)
         self.ax.grid(grid)
         self.ax.set_xlabel(xCol)

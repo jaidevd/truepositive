@@ -13,7 +13,7 @@ Write drunk, edit sober
 import sys
 import pandas as pd
 import os.path as op
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from import_wizard import QImportWizard
 from data_frame_model import DataFrameModel
 from q_canvas import QCanvas
