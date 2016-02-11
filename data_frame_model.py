@@ -21,7 +21,7 @@ class DataFrameModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
-            return str(self.df.iget_value(index.row(), index.column()))
+            return str(self.df.iat[index.row(), index.column()])
         return None
 
     def headerData(self, section, orientation, role):

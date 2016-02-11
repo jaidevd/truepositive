@@ -10,7 +10,7 @@
 
 """
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 from data_frame_model import DataFrameModel
 import pandas as pd
 from misc import colnames
@@ -26,7 +26,7 @@ class QDelimtierSelectorBox(QtGui.QComboBox):
         self.addItems(self.delimMap.keys())
         self.currentIndexChanged.connect(self.changePreviewDelimiter)
 
-    @QtCore.Slot(QtCore.QObject, int)
+    @QtCore.pyqtSlot(QtCore.QObject, int)
     def changePreviewDelimiter(self, newInt):
         key = self.delimMap.keys()[newInt]
         setattr(self.parent(), "SEP", self.delimMap[key])
@@ -41,7 +41,7 @@ class QIndexSelectorBox(QtGui.QComboBox):
         self.addItems(self.indexList)
         self.currentIndexChanged.connect(self.changePreviewIndex)
 
-    @QtCore.Slot(QtCore.QObject, int)
+    @QtCore.pyqtSlot(QtCore.QObject, int)
     def changePreviewIndex(self, newInt):
         setattr(self.parent(), "INDEX_COL", self.indexList[newInt])
         self.parent().changePreviewIndex(self.indexList[newInt])
@@ -72,7 +72,7 @@ class QParserButton(QtGui.QWidget):
         self.c_select = c_select
         self.py_select = py_select
 
-    @QtCore.Slot(QtCore.QObject, str)
+    @QtCore.pyqtSlot(QtCore.QObject, str)
     def changeParserEngine(self, toggled):
         for engineBtn in (self.c_select, self.py_select):
             if engineBtn.isChecked():
@@ -274,8 +274,8 @@ class QImportWizard(QtGui.QDialog):
         self.setLayout(layout)
 
     def getMaxRows(self):
-        firstCol = colnames(self.filepath)[0]
-        return pd.read_csv(self.filepath, usecols=[firstCol]).shape[0]
+        firstCol = colnames(str(self.filepath))[0]
+        return pd.read_csv(str(self.filepath), usecols=[firstCol]).shape[0]
 
     def showColumnSelector(self):
         if self.colSelector.exec_() == QtGui.QDialog.Accepted:
@@ -286,12 +286,15 @@ class QImportWizard(QtGui.QDialog):
             self.previewSelectedColumns()
 
     def preview(self):
-        self.previewData = pd.read_csv(self.filepath,
-                                       nrows=self.PREVIEW_NROWS, sep=self.SEP,
-                                       index_col=self.INDEX_COL,
-                                       header=self.HEADER,
-                                       engine=self.PARSER_ENGINE,
-                                       usecols=self.USECOLS)
+        if self.filepath.endsWith(".tsv"):
+            parser = pd.read_table
+        parser = pd.read_csv
+        self.previewData = parser(str(self.filepath),
+                                  nrows=self.PREVIEW_NROWS, sep=self.SEP,
+                                  index_col=self.INDEX_COL,
+                                  header=self.HEADER,
+                                  engine=self.PARSER_ENGINE,
+                                  usecols=self.USECOLS)
 
     def changePreviewIndex(self, newCol):
         if newCol == "None":
